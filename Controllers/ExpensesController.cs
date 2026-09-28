@@ -1,0 +1,51 @@
+using ExpenseTracker.Models;
+using ExpenseTracker.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ExpenseTracker.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ExpensesController : ControllerBase
+{
+    private static readonly List<Expense> _expenses = [];
+
+    [HttpGet("{id:guid}")]
+    public IActionResult GetExpenseById(Guid id)
+    {
+        var expense = _expenses.FirstOrDefault(e => e.Id == id);
+
+        if (expense is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(expense);
+    }
+
+    [HttpPost]
+    public IActionResult RegisterExpense([FromBody] ExpenseDTO expense)
+    {
+        var newExpense = new Expense
+        {
+            Id = Guid.NewGuid(),
+            Description = expense.Description,
+            Amount = expense.Amount,
+            Date = expense.Date,
+            Category = expense.Category,
+            PaymentMethod = expense.PaymentMethod
+        };
+
+        _expenses.Add(newExpense);
+
+        return CreatedAtAction(nameof(GetExpenseById), new { id = newExpense.Id }, newExpense);
+    }
+
+    [HttpGet]
+
+    public IActionResult GetAllExpenses()
+    {
+        return Ok(_expenses);
+    }
+    
+}
